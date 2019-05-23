@@ -8,12 +8,12 @@ You need to have installed **docker** on your machine.
 
 To build the docker images locally, just launch:
 
-`mvn clean install`
+`mvn clean package`
 
 ## Knot.x docker base Image
 
 The built image contains the `knotx` command in the system path.
- 
+
 ### Using the base image
 
 The image is intended to be used by extension using the Docker `FROM` directive.
@@ -74,7 +74,7 @@ ENV KNOTX_MAIN_CONFIG ${KNOTX_HOME}/my-config/bootstrap.json
 
 ## Add new dependencies to the Knot.x stack, a dependencies to your custom code
 COPY knotx-stack.json ${KNOTX_HOME}/knotx-stack.json
-RUN knotx resolve -conf ${KNOTX_MAIN_CONFIG} && rm -rf ${HOME}/.m2 
+RUN knotx resolve -conf ${KNOTX_MAIN_CONFIG} && rm -rf ${HOME}/.m2
 
 ###
 # The rest of the file should be fine.
@@ -97,9 +97,9 @@ docker run -i -t -p 8092:8092 mycompany/my-knotx
 
 ### Launching the base image
 
-The resulting image is not made to be launched directly (as it contains only core knot.x and no default configurations). If you 
+The resulting image is not made to be launched directly (as it contains only core knot.x and no default configurations). If you
 still want to launch it and see, whats in the image, just do:
- 
+
 `docker run -i -t knotx/knotx:1.3.0`
 
 The knotx.x files are located in ` /usr/local/knotx/`.
