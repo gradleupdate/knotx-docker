@@ -112,7 +112,7 @@
                   <goal>unpack-dependencies</goal>
                 </goals>
                 <configuration>
-                  <includeArtifactIds>knotx-stack-manager</includeArtifactIds>
+                  <includeArtifactIds>knotx-stack</includeArtifactIds>
                   <outputDirectory>${project.build.directory}/docker/${docker.domain}/knotx/build</outputDirectory>
                   <markersDirectory>${project.build.directory}/marker-dependency</markersDirectory>
                 </configuration>
@@ -124,7 +124,7 @@
                   <goal>unpack-dependencies</goal>
                 </goals>
                 <configuration>
-                  <includeArtifactIds>knotx-stack-manager</includeArtifactIds>
+                  <includeArtifactIds>knotx-stack</includeArtifactIds>
                   <outputDirectory>${project.build.directory}/docker/${docker.domain}/knotx-alpine/build</outputDirectory>
                   <markersDirectory>${project.build.directory}/marker-dependency-alpine</markersDirectory>
                 </configuration>
