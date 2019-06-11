@@ -100,14 +100,14 @@ docker run -i -t -p 8092:8092 mycompany/my-knotx
 The resulting image is not made to be launched directly (as it contains only core knot.x and no default configurations). If you
 still want to launch it and see, whats in the image, just do:
 
-`docker run -i -t knotx/knotx:1.3.0`
+`docker run -i -t knotx/knotx`
 
 The knotx.x files are located in ` /usr/local/knotx/`.
 
 You can access the `knotx` command directly using:
 
-`docker run -p8092:8092 knotx/knotx:1.3.0 knotx`
+`docker run -p8092:8092 knotx/knotx`
 
 Or simply try to run a knotx in a container
 
-`docker run -p8092:8092 knotx/knotx:1.3.0 knotx run-knotx`
+`docker run -p8092:8092 knotx/knotx knotx run-knotx`
