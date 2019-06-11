@@ -17,6 +17,8 @@ The built image contains the `knotx` command in the system path.
 ### Using the base image
 
 The image is intended to be used by extension using the Docker `FROM` directive.
+We use the Knot.x Docker image in the [Knot.x Starter Kit](https://github.com/Knotx/knotx-starter-kit) - the best way to start a new Knot.x project.
+
 
 ```Dockerfile
 FROM knotx/knotx:2.0.0-RC2
