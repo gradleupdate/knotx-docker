@@ -18,39 +18,8 @@ The built image contains the `knotx` command in the system path.
 
 The image is intended to be used by extension using the Docker `FROM` directive.
 
-#### Setting up the stack
-The knotx/knotx-exec image provides the default "full" Vert.x stack. You may want to customize this stack and create your own exec image. First, create a vertx-stack.json file:
-
-```json
-{
-  "variables": {
-    "vertx.version": "3.3.3"
-  },
-  "dependencies": [
-    {
-      "groupId": "io.vertx",
-      "artifactId": "vertx-web",
-      "version": "${vertx.version}",
-      "included": true
-    },
-    {
-      "groupId": "io.vertx",
-      "artifactId": "vertx-lang-js",
-      "version": "${vertx.version}",
-      "included": true
-    }
-  ]
-}
-```
-You can list any dependency you need, not just the Vert.x artifacts (refer to the Stack Manager documentation for details).
-
-First line of your Dockerfile should say what docker image you're going to start with. Use `knotx/knotx:<version>` where `<version>` is the version of Knot.x the immage is going to run.
-In this example we're using `1.3.0`, for other version simply look at `https://hub.docker.com/r/knotx/knotx/tags/` or `https://hub.docker.com/r/knotx/knotx-alpine/tags/` if you want to use alpine image.
-
-**NOTE: Avoid using `latest` tag, as it point always to latest build image, that in most cases if SNAPSHOT images**
-
 ```Dockerfile
-FROM knotx/knotx:1.3.0
+FROM knotx/knotx:2.0.0-RC2
 
 # Set the JVM Options
 ENV JAVA_OPTS "-Dfoo=bar"
