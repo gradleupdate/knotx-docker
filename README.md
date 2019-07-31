@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/knotx/Knotx/_apis/build/status/Knotx.knotx-docker?branchName=master)](https://dev.azure.com/knotx/Knotx/_build/latest?definitionId=13&branchName=master)
+
 # Knot.x Docker Images
 
 This project builds the docker images for the Knot.x
