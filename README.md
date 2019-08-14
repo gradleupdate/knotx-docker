@@ -23,7 +23,7 @@ We use the Knot.x Docker image in the [Knot.x Starter Kit](https://github.com/Kn
 
 
 ```Dockerfile
-FROM knotx/knotx:2.0.0-RC2
+FROM knotx/knotx:2.0.0
 
 # Set the JVM Options
 ENV JAVA_OPTS "-Dfoo=bar"
