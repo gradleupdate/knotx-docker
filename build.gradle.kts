@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Knot.x Project
+ * Copyright (C) 2019 Knot.x Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 plugins {
     id("io.knotx.distribution")
     id("com.bmuschko.docker-remote-api")
+    id("org.nosphere.apache.rat")
 }
 
 dependencies {
@@ -34,6 +35,19 @@ allprojects {
 }
 
 tasks {
+    named<org.nosphere.apache.rat.RatTask>("rat") {
+        excludes.addAll(listOf(
+                "*.md", // docs
+                "gradle/wrapper/**", "gradle*", "**/build/**", // Gradle
+                "*.iml", "*.ipr", "*.iws", "*.idea/**", // IDEs
+                ".github/*"
+        ))
+    }
+
+    withType<com.bmuschko.gradle.docker.tasks.image.DockerBuildImage>() {
+        dependsOn("rat")
+    }
+
     register("build") {
         group = "build"
         dependsOn("fetch-stack", "build-docker")
