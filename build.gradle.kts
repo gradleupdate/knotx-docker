@@ -17,7 +17,6 @@
 plugins {
     id("io.knotx.distribution")
     id("com.bmuschko.docker-remote-api")
-    id("java")
 }
 
 dependencies {
@@ -34,18 +33,21 @@ allprojects {
     }
 }
 
-tasks.named("build") {
-    dependsOn("fetch-stack", "build-docker")
-}
+tasks {
+    register("build") {
+        group = "build"
+        dependsOn("fetch-stack", "build-docker")
+    }
 
-tasks.register("build-docker") {
-    group = "docker"
-    dependsOn("prepareDocker")
-}
+    register("build-docker") {
+        group = "docker"
+        dependsOn("prepareDocker")
+    }
 
-tasks.register("fetch-stack") {
-    group = "stack"
-    dependsOn("assembleCustomDistribution")
+    register("fetch-stack") {
+        group = "stack"
+        dependsOn("assembleCustomDistribution")
+    }
 }
 
 apply(from = "gradle/docker.gradle.kts")
