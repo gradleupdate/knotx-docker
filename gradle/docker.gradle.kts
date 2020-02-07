@@ -45,15 +45,13 @@ fun DockerRemoveImage.remove(name: String): Unit {
 tasks.register<Copy>("copyDockerfileBase") {
     group = "docker"
     from(dockerfileBaseImagePath)
-    into("$buildDir/out/")
-    mustRunAfter("downloadBaseDistribution")
+    into("$buildDir/out/base")
 }
 
 tasks.register<Copy>("copyDockerfileBaseAlpine") {
     group = "docker"
     from(dockerfileBaseAlpineImagePath)
-    into("$buildDir/out/")
-    mustRunAfter("downloadBaseDistribution")
+    into("$buildDir/out/baseAlpine")
 }
 
 tasks.register<DockerRemoveImage>("removeBaseImage") {
@@ -69,6 +67,7 @@ tasks.register<DockerRemoveImage>("removeBaseAlpineImage") {
 tasks.register<DockerBuildImage> ("buildBaseImage") {
     group = "docker"
     inputDir.set(file("$buildDir/out"))
+    dockerFile.set(file("$buildDir/out/base/Dockerfile"))
     images.add(dockerBaseImageId)
     dependsOn("removeBaseImage", "copyDockerfileBase")
 }
@@ -76,6 +75,7 @@ tasks.register<DockerBuildImage> ("buildBaseImage") {
 tasks.register<DockerBuildImage> ("buildBaseAlpineImage") {
     group = "docker"
     inputDir.set(file("$buildDir/out"))
+    dockerFile.set(file("$buildDir/out/baseAlpine/Dockerfile"))
     images.add(dockerBaseAlpineImageId)
     dependsOn("removeBaseAlpineImage", "copyDockerfileBaseAlpine")
 }
@@ -95,7 +95,8 @@ tasks.register<DockerSaveImage>("saveBaseAlpineImage") {
 }
 
 tasks.register("prepareDocker") {
-    dependsOn("cleanDistribution", "overwriteCustomFiles", "buildBaseImage", "buildBaseAlpineImage", "saveDockerImage")
+    dependsOn("buildBaseImage", "buildBaseAlpineImage", "saveDockerImage")
+    mustRunAfter("downloadAndUnzipDistribution")
 }
 
 

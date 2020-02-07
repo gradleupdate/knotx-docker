@@ -15,26 +15,26 @@
  */
 
 plugins {
-    id("io.knotx.distribution")
     id("com.bmuschko.docker-remote-api")
     id("org.nosphere.apache.rat")
 }
 
-dependencies {
-    subprojects.forEach { "dist"(project(":${it.name}")) }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-        mavenLocal()
-        maven { url = uri("https://plugins.gradle.org/m2/") }
-        maven { url = uri("https://oss.sonatype.org/content/groups/staging/") }
-        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
-    }
+repositories {
+    jcenter()
+    mavenLocal()
+    maven { url = uri("https://plugins.gradle.org/m2/") }
+    maven { url = uri("https://oss.sonatype.org/content/groups/staging/") }
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 tasks {
+    register("printProps") {
+        doLast{
+            logger.lifecycle("knotx.version: ${project.property("knotx.version")}")
+            logger.lifecycle("knotx.conf: ${project.property("knotx.conf")}")
+        }
+    }
+
     named<org.nosphere.apache.rat.RatTask>("rat") {
         excludes.addAll(listOf(
                 "*.md", // docs
@@ -50,18 +50,18 @@ tasks {
 
     register("build") {
         group = "build"
-        dependsOn("fetch-stack", "build-docker")
+        dependsOn("downloadAndUnzipDistribution", "prepareDocker")
     }
 
-    register("build-docker") {
-        group = "docker"
-        dependsOn("prepareDocker")
+    register("clean") {
+        group = "build"
+        dependsOn("removeBaseImage", "removeBaseAlpineImage")
+        doFirst {
+            delete(buildDir)
+        }
     }
 
-    register("fetch-stack") {
-        group = "stack"
-        dependsOn("assembleCustomDistribution")
-    }
 }
 
 apply(from = "gradle/docker.gradle.kts")
+apply(from = "gradle/distribution.gradle.kts")
