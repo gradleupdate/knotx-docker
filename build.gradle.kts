@@ -15,6 +15,7 @@
  */
 
 plugins {
+    base
     id("com.bmuschko.docker-remote-api")
     id("org.nosphere.apache.rat")
 }
@@ -23,18 +24,9 @@ repositories {
     jcenter()
     mavenLocal()
     maven { url = uri("https://plugins.gradle.org/m2/") }
-    maven { url = uri("https://oss.sonatype.org/content/groups/staging/") }
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 tasks {
-    register("printProps") {
-        doLast{
-            logger.lifecycle("knotx.version: ${project.property("knotx.version")}")
-            logger.lifecycle("knotx.conf: ${project.property("knotx.conf")}")
-        }
-    }
-
     named<org.nosphere.apache.rat.RatTask>("rat") {
         excludes.addAll(listOf(
                 "*.md", // docs
@@ -44,21 +36,20 @@ tasks {
         ))
     }
 
+    named("check") {
+        dependsOn("rat")
+    }
+
     withType<com.bmuschko.gradle.docker.tasks.image.DockerBuildImage>() {
         dependsOn("rat")
     }
 
-    register("build") {
-        group = "build"
+    named("build") {
         dependsOn("downloadAndUnzipDistribution", "prepareDocker")
     }
 
-    register("clean") {
-        group = "build"
+    named("clean") {
         dependsOn("removeBaseImage", "removeBaseAlpineImage")
-        doFirst {
-            delete(buildDir)
-        }
     }
 
 }
