@@ -10,7 +10,7 @@ You need to have installed **docker** on your machine.
 
 To build the docker images locally, just launch:
 
-`mvn clean package`
+`$> ./gradlew build`
 
 ## Knot.x docker base Image
 
