@@ -16,8 +16,8 @@
 
 plugins {
     base
-    id("com.bmuschko.docker-remote-api") version "6.1.3"
-    id("org.nosphere.apache.rat") version "0.6.0"
+    id("com.bmuschko.docker-remote-api")
+    id("org.nosphere.apache.rat")
 }
 
 repositories {
