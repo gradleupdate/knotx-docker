@@ -1,4 +1,5 @@
 [![Build Status](https://dev.azure.com/knotx/Knotx/_apis/build/status/Knotx.knotx-docker?branchName=master)](https://dev.azure.com/knotx/Knotx/_build/latest?definitionId=13&branchName=master)
+[![Gradle Status](https://gradleupdate.appspot.com/Knotx/knotx-docker/status.svg)](https://gradleupdate.appspot.com/Knotx/knotx-docker/status)
 
 # Knot.x Docker Images
 
