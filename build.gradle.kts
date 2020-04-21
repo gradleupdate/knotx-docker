@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.bmuschko.gradle.docker.tasks.image.*
 
 plugins {
     base
+    id("io.knotx.release-base")
     id("com.bmuschko.docker-remote-api")
     id("org.nosphere.apache.rat")
 }
@@ -41,32 +43,48 @@ tasks {
         dependsOn("rat")
     }
 
-    withType<com.bmuschko.gradle.docker.tasks.image.DockerBuildImage>() {
+    withType<DockerBuildImage>() {
         dependsOn("rat")
     }
 
     named("build") {
-        dependsOn("downloadAndUnzipDistribution", "prepareDocker")
+        dependsOn("buildBaseImage", "buildBaseAlpineImage")
+        mustRunAfter("setVersion")
     }
 
     named("clean") {
         dependsOn("removeBaseImage", "removeBaseAlpineImage")
     }
 
+    named("updateChangelog") {
+        dependsOn("build", "setVersion")
+    }
+
+    register("prepare") {
+        group = "release"
+        dependsOn("updateChangelog")
+    }
+
+    register("publishArtifacts") {
+        group = "release"
+        logger.lifecycle("Publishing docker images")
+        dependsOn("pushImages")
+    }
+
 }
-
-
 
 val dockerBaseImageRef = "$buildDir/.docker/buildBaseImage-imageId.txt"
 val dockerBaseAlpineImageRef = "$buildDir/.docker/buildBaseAlpineImage-imageId.txt"
 
-val dockerBaseImageId = "${project.property("docker.domain")}/knotx:${project.version}"
-val dockerBaseAlpineImageId = "${project.property("docker.domain")}/knotx-alpine:${project.version}"
+val dockerRepository = project.property("docker.domain").toString()
+
+val dockerBaseImageId = "knotx"
+val dockerBaseAlpineImageId = "knotx-alpine"
 
 val dockerfileBaseImagePath = "$projectDir/src/main/docker/base/Dockerfile"
 val dockerfileBaseAlpineImagePath = "$projectDir/src/main/docker/base-alpine/Dockerfile"
 
-fun com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage.remove(name: String): Unit {
+fun DockerRemoveImage.remove(name: String): Unit {
     val spec = object : Spec<Task> {
         override fun isSatisfiedBy(task: Task): Boolean {
             return file(name).exists()
@@ -85,62 +103,65 @@ tasks.register<Copy>("copyDockerfileBase") {
     group = "docker"
     from(dockerfileBaseImagePath)
     into("$buildDir/out/base")
+    mustRunAfter("cleanDistribution")
 }
 
 tasks.register<Copy>("copyDockerfileBaseAlpine") {
     group = "docker"
     from(dockerfileBaseAlpineImagePath)
     into("$buildDir/out/baseAlpine")
+    mustRunAfter("cleanDistribution")
 }
 
-tasks.register<com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage>("removeBaseImage") {
+tasks.register<DockerRemoveImage>("removeBaseImage") {
     group = "docker"
     remove(dockerBaseImageRef)
 }
 
-tasks.register<com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage>("removeBaseAlpineImage") {
+tasks.register<DockerRemoveImage>("removeBaseAlpineImage") {
     group = "docker"
     remove(dockerBaseAlpineImageRef)
 }
 
-tasks.register<com.bmuschko.gradle.docker.tasks.image.DockerBuildImage> ("buildBaseImage") {
+tasks.register<DockerBuildImage> ("buildBaseImage") {
     group = "docker"
     inputDir.set(file("$buildDir/out"))
     dockerFile.set(file("$buildDir/out/base/Dockerfile"))
-    images.add(dockerBaseImageId)
-    dependsOn("removeBaseImage", "copyDockerfileBase")
+    images.add("$dockerRepository/$dockerBaseImageId:${project.version}")
+    dependsOn("removeBaseImage", "copyDockerfileBase", "downloadAndUnzipDistribution")
 }
 
-tasks.register<com.bmuschko.gradle.docker.tasks.image.DockerBuildImage> ("buildBaseAlpineImage") {
+tasks.register<DockerBuildImage> ("buildBaseAlpineImage") {
     group = "docker"
     inputDir.set(file("$buildDir/out"))
     dockerFile.set(file("$buildDir/out/baseAlpine/Dockerfile"))
-    images.add(dockerBaseAlpineImageId)
-    dependsOn("removeBaseAlpineImage", "copyDockerfileBaseAlpine")
+    images.add("$dockerRepository/$dockerBaseAlpineImageId:${project.version}")
+    dependsOn("removeBaseAlpineImage", "copyDockerfileBaseAlpine", "downloadAndUnzipDistribution")
 }
 
-tasks.register<com.bmuschko.gradle.docker.tasks.image.DockerSaveImage>("saveBaseImage") {
-    destFile.set(file("$projectDir/build/docker/docker-build-base.tar"))
-    image.set(dockerBaseImageId)
-    useCompression.set(true)
-    mustRunAfter("buildBaseImage")
+tasks.register<DockerTagImage>("tagBaseAlpineImage") {
+    group = "docker"
+    imageId.set("$dockerRepository/$dockerBaseAlpineImageId:${project.version}")
+    repository.set("$dockerRepository/$dockerBaseAlpineImageId")
+    tag.set(project.version.toString())
 }
 
-tasks.register<com.bmuschko.gradle.docker.tasks.image.DockerSaveImage>("saveBaseAlpineImage") {
-    destFile.set(file("$projectDir/build/docker/docker-build-base-alpine.tar"))
-    image.set(dockerBaseAlpineImageId)
-    useCompression.set(true)
-    mustRunAfter("buildBaseAlpineImage")
+tasks.register<DockerTagImage>("tagBaseImage") {
+    group = "docker"
+    imageId.set("$dockerRepository/$dockerBaseImageId:${project.version}")
+    repository.set("$dockerRepository/$dockerBaseImageId")
+    tag.set(project.version.toString())
 }
 
-tasks.register("prepareDocker") {
-    dependsOn("buildBaseImage", "buildBaseAlpineImage", "saveDockerImage")
-    mustRunAfter("downloadAndUnzipDistribution")
-}
-
-
-tasks.register("saveDockerImage") {
-    dependsOn("saveBaseImage", "saveBaseAlpineImage")
+tasks.register<DockerPushImage>("pushImages") {
+    group = "docker"
+    images.add("$dockerRepository/$dockerBaseAlpineImageId:${project.version}")
+    images.add("$dockerRepository/$dockerBaseImageId:${project.version}")
+    dependsOn("tagBaseAlpineImage", "tagBaseImage")
+    registryCredentials {
+        username.set(if (project.hasProperty("dockerHubUsername")) project.property("dockerHubUsername")?.toString() else "UNKNOWN")
+        password.set(if (project.hasProperty("dockerHubPassword")) project.property("dockerHubPassword")?.toString() else "UNKNOWN")
+    }
 }
 
 apply(from = "gradle/distribution.gradle.kts")
