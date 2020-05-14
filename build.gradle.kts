@@ -23,10 +23,9 @@ plugins {
 }
 
 repositories {
-    jcenter()
     mavenLocal()
-    mavenCentral()
-    maven { url = uri("https://plugins.gradle.org/m2/") }
+    jcenter()
+    gradlePluginPortal()
 }
 
 tasks {
